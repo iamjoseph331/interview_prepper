@@ -1,5 +1,7 @@
 # Interview Prepper
 
+Visit https://<user>.github.io/interview_prepper/ for the demo
+
 AI / ML / Data Science mock-interview practice, graded by Claude.
 
 Pick a level (Junior / Senior / Staff) and one or more categories, and the app generates calibrated questions and grades your answers against a fixed rubric. Works fully in the browser — no backend.
