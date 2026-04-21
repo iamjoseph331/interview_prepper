@@ -1,6 +1,6 @@
 # Interview Prepper
 
-Visit https://<user>.github.io/interview_prepper/ for the demo
+Visit https://iamjoseph331.github.io/interview_prepper/ for the demo
 
 AI / ML / Data Science mock-interview practice, graded by Claude.
 
