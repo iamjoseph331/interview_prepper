@@ -1,0 +1,33 @@
+{
+  "categories": [
+    { "id": "self_intro",         "name": "Self introduction",                  "group": "Behavioral" },
+    { "id": "motivation",         "name": "Motivation (応募動機)",              "group": "Behavioral" },
+    { "id": "past_experience",    "name": "Past experience",                    "group": "Behavioral" },
+    { "id": "star",               "name": "STAR / behavioral",                  "group": "Behavioral" },
+    { "id": "alignment",          "name": "Alignment / logistics",              "group": "Behavioral" },
+    { "id": "company_questions",  "name": "Questions for the company",          "group": "Behavioral" },
+
+    { "id": "coding_algo",        "name": "Coding: DSA / competitive",          "group": "Coding" },
+    { "id": "coding_sql",         "name": "Coding: SQL",                        "group": "Coding" },
+    { "id": "coding_python",      "name": "Coding: Python / pandas",            "group": "Coding" },
+    { "id": "coding_debug",       "name": "Coding: debugging / code review",    "group": "Coding" },
+
+    { "id": "sysdesign_backend",  "name": "System design: backend",             "group": "System design" },
+    { "id": "sysdesign_ml",       "name": "System design: ML systems",          "group": "System design" },
+    { "id": "sysdesign_pipeline", "name": "System design: data pipelines / MLOps", "group": "System design" },
+
+    { "id": "ml_fundamentals",    "name": "Machine learning fundamentals",      "group": "Quiz" },
+    { "id": "deep_learning",      "name": "Deep learning",                      "group": "Quiz" },
+    { "id": "stats",              "name": "Statistics & probability",           "group": "Quiz" },
+    { "id": "math",               "name": "Linear algebra & optimization",      "group": "Quiz" },
+    { "id": "ab_testing",         "name": "A/B testing & experimentation",      "group": "Quiz" },
+    { "id": "nlp",                "name": "NLP",                                "group": "Quiz" },
+    { "id": "cv",                 "name": "Computer vision",                    "group": "Quiz" },
+    { "id": "recsys",             "name": "Recommendation systems",             "group": "Quiz" },
+    { "id": "rl",                 "name": "Reinforcement learning",             "group": "Quiz" },
+    { "id": "time_series",        "name": "Time series",                        "group": "Quiz" },
+    { "id": "responsible_ai",     "name": "Responsible AI / fairness",          "group": "Quiz" },
+    { "id": "llm",                "name": "LLM: RAG / fine-tuning / agents",    "group": "Quiz" },
+    { "id": "data_analysis",      "name": "Data analysis",                      "group": "Quiz" }
+  ]
+}

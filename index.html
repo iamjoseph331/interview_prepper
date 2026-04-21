@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interview Prepper — AI/ML/DS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="app-shell">
+
+  <header id="top-bar">
+    <div class="brand">
+      <span class="brand-name">Interview Prepper</span>
+      <span class="brand-sub">AI · ML · Data Science</span>
+    </div>
+    <div class="level-switch" id="level-switch" role="group" aria-label="Experience level">
+      <div class="level-slider-track">
+        <div class="level-slider-thumb" id="level-thumb"></div>
+        <button class="level-btn active" data-level="Junior">Junior</button>
+        <button class="level-btn" data-level="Senior">Senior</button>
+        <button class="level-btn" data-level="Staff">Staff</button>
+      </div>
+      <div class="level-hint" id="level-hint">0–2 YOE · fundamentals</div>
+    </div>
+  </header>
+
+  <main id="app">
+
+    <!-- SETUP SCREEN -->
+    <section id="setup" class="screen active">
+
+      <div class="section-label">Categories</div>
+      <div class="section-desc">Pick what you want to practice — tap to toggle</div>
+      <div class="cat-actions-row">
+        <button type="button" class="ghost-btn" id="cat-all">Select all</button>
+        <button type="button" class="ghost-btn" id="cat-none">Clear all</button>
+      </div>
+      <div id="categories"></div>
+
+      <div class="row-settings">
+        <div class="setting-block">
+          <div class="section-label">Questions</div>
+          <div class="stepper">
+            <button type="button" class="step-btn" id="num-dec">−</button>
+            <span id="num-display">5</span>
+            <button type="button" class="step-btn" id="num-inc">+</button>
+          </div>
+          <input type="hidden" id="num-questions" value="5" />
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:28px">Mode</div>
+      <div class="mode-cards">
+        <div class="mode-card" id="mode-api-card">
+          <div class="mode-card-header">
+            <span class="mode-icon">✦</span>
+            <div>
+              <div class="mode-title">Graded session</div>
+              <div class="mode-desc">Live question generation + AI grading</div>
+            </div>
+            <button class="mode-toggle-btn" id="mode-api-toggle">Configure</button>
+          </div>
+          <div class="mode-card-body" id="mode-api-body" style="display:none">
+            <label class="field-label">Anthropic API key
+              <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
+            </label>
+            <label class="field-label">Model
+              <select id="model">
+                <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — balanced (default)</option>
+                <option value="claude-haiku-4-5">Haiku 4.5 — fast & cheap</option>
+                <option value="claude-opus-4-7">Opus 4.7 — highest quality</option>
+              </select>
+            </label>
+            <p class="fine-print">Your key stays in <code>sessionStorage</code> and is only sent to <code>api.anthropic.com</code>. Cleared when you close this tab.</p>
+            <button id="start-api" class="primary-btn">Start graded session →</button>
+          </div>
+        </div>
+
+        <div class="mode-card" id="mode-demo-card">
+          <div class="mode-card-header">
+            <span class="mode-icon">◎</span>
+            <div>
+              <div class="mode-title">Demo mode</div>
+              <div class="mode-desc">Pre-baked questions, self-study outlines</div>
+            </div>
+            <button id="start-demo" class="primary-btn small">Start →</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="setup-error" class="error-msg"></div>
+    </section>
+
+    <!-- QUIZ SCREEN -->
+    <section id="quiz" class="screen">
+      <div class="progress-row">
+        <span id="progress-text" class="progress-label">Question 1 of 5</span>
+        <div class="progress-track"><div id="progress-bar"></div></div>
+      </div>
+      <div class="quiz-card">
+        <div class="q-meta">
+          <span class="q-cat-chip" id="q-category"></span>
+          <span class="q-level-chip" id="q-level-chip"></span>
+        </div>
+        <h2 id="q-text" class="q-text"></h2>
+        <textarea id="q-answer" rows="9" placeholder="Type your answer here — aim for 2–5 minutes of spoken content."></textarea>
+        <div class="quiz-actions">
+          <button id="q-skip" class="ghost-btn">Skip</button>
+          <button id="q-submit" class="primary-btn">Submit →</button>
+        </div>
+        <div id="q-status" class="status-msg"></div>
+      </div>
+    </section>
+
+    <!-- RESULTS SCREEN -->
+    <section id="results" class="screen">
+      <div class="results-header">
+        <h1 class="results-title">Session complete</h1>
+      </div>
+      <div id="summary" class="results-summary-card"></div>
+      <div id="per-question"></div>
+      <button id="restart" class="primary-btn" style="margin-top:24px">New session →</button>
+    </section>
+
+  </main>
+</div>
+<script src="app.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>

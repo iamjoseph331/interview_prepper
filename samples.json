@@ -1,0 +1,124 @@
+{
+  "_comment": "Pre-baked demo questions. Shown in demo mode when user has no API key. No grading is performed; a 'strong-answer outline' is shown after the user submits their attempt, for self-comparison only.",
+
+  "Junior": [
+    {
+      "category_id": "ml_fundamentals",
+      "question": "Explain the difference between precision and recall. Give an example where you would optimize for one over the other.",
+      "strong_answer_outline": [
+        "Precision = TP / (TP + FP); Recall = TP / (TP + FN).",
+        "Precision ↑ when false positives are costly (e.g., spam filter blocking legit mail).",
+        "Recall ↑ when false negatives are costly (e.g., cancer screening).",
+        "Mention F1 as a balance; mention threshold tuning."
+      ]
+    },
+    {
+      "category_id": "coding_sql",
+      "question": "Given a table `orders(user_id, order_date, amount)`, write a query to find the top 5 users by total spend in the last 30 days.",
+      "strong_answer_outline": [
+        "`WHERE order_date >= CURRENT_DATE - INTERVAL '30 days'`",
+        "`GROUP BY user_id`, `SUM(amount) AS total`",
+        "`ORDER BY total DESC LIMIT 5`",
+        "Bonus: handle ties with `RANK()` / `DENSE_RANK()`."
+      ]
+    },
+    {
+      "category_id": "deep_learning",
+      "question": "What is overfitting, and name three techniques to reduce it.",
+      "strong_answer_outline": [
+        "Model fits training noise; gap between train/val loss.",
+        "Techniques: more data / augmentation, regularization (L1/L2/dropout), early stopping, simpler model, cross-validation.",
+        "Explain *why* each works (capacity vs signal)."
+      ]
+    },
+    {
+      "category_id": "self_intro",
+      "question": "Give a 60-second self-introduction for this role.",
+      "strong_answer_outline": [
+        "One sentence: who you are and current role.",
+        "One sentence: most relevant recent project and outcome.",
+        "One sentence: what you're looking for and why this role.",
+        "Calibrated vocabulary; no rambling."
+      ]
+    }
+  ],
+
+  "Senior": [
+    {
+      "category_id": "sysdesign_ml",
+      "question": "Design a recommendation system for a video platform with 10M daily active users. Walk me through candidate generation, ranking, and how you'd evaluate it online.",
+      "strong_answer_outline": [
+        "Two-stage: candidate gen (ANN / two-tower) → ranker (GBDT or DNN with features).",
+        "Feature categories: user, item, context; freshness handling.",
+        "Offline eval: AUC, NDCG, recall@K; online eval: A/B test with watch time / retention.",
+        "Cold start, diversity/exploration, latency budget per stage.",
+        "Monitoring: drift, stale embeddings."
+      ]
+    },
+    {
+      "category_id": "llm",
+      "question": "You're building a RAG system for internal docs (~500k documents). Users complain answers are 'confidently wrong'. Walk me through how you'd diagnose and fix this.",
+      "strong_answer_outline": [
+        "Isolate: retrieval quality vs generation faithfulness (eval both).",
+        "Retrieval: embedding model choice, chunking, hybrid BM25+dense, reranking.",
+        "Generation: prompt for citation, refusal on low-confidence, temperature, grounding checks.",
+        "Eval loop: golden Q/A set, LLM-as-judge with rubric, regression tests.",
+        "Monitoring: user thumbs, citation click-through."
+      ]
+    },
+    {
+      "category_id": "star",
+      "question": "Tell me about a time you disagreed with a technical decision made by a peer or lead. How did you handle it?",
+      "strong_answer_outline": [
+        "Situation + Task: concrete disagreement, stakes.",
+        "Action: how you gathered evidence, framed the tradeoff, escalated or didn't.",
+        "Result: outcome and what you learned about when to push vs yield."
+      ]
+    },
+    {
+      "category_id": "ab_testing",
+      "question": "Your A/B test shows a 0.3% lift in CTR with p=0.04 after 2 days. Would you ship it?",
+      "strong_answer_outline": [
+        "Skepticism: novelty/primacy effect, day-of-week, early-stopping issues.",
+        "Ask about: sample size calc, pre-registered duration, guardrail metrics, segment heterogeneity.",
+        "Decision: usually no — run full duration, pre-commit primary metric + SRM check.",
+        "Mention multiple-testing concerns."
+      ]
+    }
+  ],
+
+  "Staff": [
+    {
+      "category_id": "sysdesign_ml",
+      "question": "You're the tech lead for a team that wants to build ten new ML features over the next year. The current ML platform is a patchwork of notebooks and cron. How do you sequence the platform investment vs the feature work?",
+      "strong_answer_outline": [
+        "Problem framing: platform is a means, not end. What unblocks the most feature work fastest?",
+        "Identify the 2–3 highest-leverage platform primitives (feature store? model registry? batch inference?). Sequence by cost to retrofit later.",
+        "Co-design with feature team: land first feature on v0.1 platform, then iterate.",
+        "Explicit deprecation of notebook flow; ownership model; org dependencies.",
+        "Risk: over-engineering. Counter: measure adoption, kill unused pieces."
+      ]
+    },
+    {
+      "category_id": "responsible_ai",
+      "question": "You're shipping an LLM-powered customer-support agent. Legal and safety want a pre-launch review. What's your plan — what do you measure, who owns what, and what's your rollback strategy?",
+      "strong_answer_outline": [
+        "Risk taxonomy: hallucination, PII leakage, jailbreak, disparate performance.",
+        "Metrics per risk with thresholds; red-team suite; human review sampling plan.",
+        "Ownership: eng (infra), ML (model), legal (policy), ops (review queue).",
+        "Rollout: internal → employee dogfood → 1% → 10% → 100% with kill switches.",
+        "Rollback: prompt-level hot-patch, model version pin, full disable; monitoring triggers."
+      ]
+    },
+    {
+      "category_id": "past_experience",
+      "question": "Walk me through a project where you had to make a tradeoff between technical elegance and time-to-impact. What changed about how you approach that now?",
+      "strong_answer_outline": [
+        "Specific project with real constraint (deadline, headcount, revenue).",
+        "Named tradeoff and why.",
+        "Reflection: heuristic you now use to make that call faster.",
+        "Staff signal: second-order effects, team/org cost, not just code cost."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+Self introduction:
+	- background / career history
+	- strengths & weaknesses
+	- reason for job change
+	- short-term vs long-term career goals
+	- tell me about yourself vs formal 自己紹介
+応募動機:
+	- Why this company
+	- Why this role specifically
+	- Why now (timing)
+	- What value can you provide this company
+	- What can the company provide you
+Technical quiz:
+	- coding:
+		- competitive :
+			- whiteboard
+			- ide
+			- data structures & algorithms
+			- debugging / code review
+		- tool use:
+			- SQL
+			- REST calls
+			- Python / pandas
+			- shell / git
+			- notebook workflow
+		- system design:
+			- backend
+			- special purpose
+			- ML system design (recommender, search ranker, etc.)
+			- data pipeline / ETL
+			- MLOps / model serving / monitoring
+	- quizzes:
+		- Machine learning:
+			- Precision / Recall
+			- overfitting
+			- model structures
+			- bias / variance tradeoff
+			- regularization (L1/L2, dropout)
+			- cross-validation
+			- feature engineering
+			- metrics (F1, ROC-AUC, PR-AUC, RMSE/MAE, calibration)
+			- hyperparameter tuning
+		- Deep learning:
+			- CNN
+			- RNN
+			- Transformer / attention
+			- optimizers
+		- Statistics & probability
+		- Linear algebra / calculus / optimization
+		- A/B testing & experimentation
+		- NLP fundamentals
+		- Computer vision fundamentals
+		- Recommendation systems
+		- Reinforcement learning
+		- Time series
+		- Responsible AI / fairness / safety
+		- LLM:
+			- tokenization & embeddings
+			- prompt engineering
+			- RAG
+			- fine-tuning (SFT, LoRA, PEFT, RLHF, DPO)
+			- evaluation (benchmarks, LLM-as-judge)
+			- agents & tool use
+			- context window / caching / cost tradeoffs
+		- Data analysis
+Assignment:
+	- homework
+	- homework discussion
+	- take-home coding challenge
+	- live pair programming / live coding
+	- case study / business problem
+	- presentation / demo of prior work
+	- paper reading / research discussion
+Past experience:
+	- customer facing
+	- AI agent
+	- finetuning LLM/VLM
+	- production deployment / scale
+	- team leadership / mentoring
+	- cross-functional collaboration (PM, design, business)
+	- research / publications / open source
+	- data science projects (non-LLM)
+	- incident response / on-call
+	- performance optimization
+STAR questions:
+	- act proactively
+	- different opinions
+	- push yourself over limits
+	- handed instructions not clear
+	- made a mistake
+	- conflict resolution with teammates
+	- tight deadlines / prioritization under pressure
+	- failed project / lessons learned
+	- giving & receiving feedback
+	- leading without authority / influence
+	- handling ambiguity
+	- ethical dilemma (AI ethics)
+	- dealing with technical debt
+Alignment:
+	- Top 3 priorities
+	- Expected Salary
+	- Other applications
+	- level of devote
+	- remote/in office
+	- career path
+	- visa / work authorization
+	- start date / notice period
+	- benefits expectations
+	- management track vs IC track
+	- team size / structure preference
+	- travel willingness
+
+Questions about the company:
+	- team structure & roadmap
+	- tech stack & tooling
+	- growth / promotion path
+	- evaluation criteria
+	- onboarding
+	- current challenges the team is facing
+
+Post-interview:
+	- thank-you notes
+	- follow-up cadence
+	- negotiation
+
