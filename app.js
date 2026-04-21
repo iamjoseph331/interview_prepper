@@ -28,6 +28,30 @@ Rules:
 3. When grading, grade conservatively. Do not inflate for politeness. Vague answers get low Depth and Practical grounding.
 4. Output STRICT JSON only on every call. No prose, no markdown fence.`;
 
+// ---- Notes (session-only: kept in sessionStorage so they clear when the tab closes) ----
+const NOTES_KEY = "interviewPrepperNotes";
+
+function loadAllNotes() {
+  try {
+    const raw = sessionStorage.getItem(NOTES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+function saveAllNotes(notes) {
+  sessionStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+function getNote(categoryId) {
+  return loadAllNotes()[categoryId] || "";
+}
+function setNote(categoryId, text) {
+  const notes = loadAllNotes();
+  if (text && text.trim()) notes[categoryId] = text;
+  else delete notes[categoryId];
+  saveAllNotes(notes);
+}
+
 // ---- State ----
 const state = {
   categories: [],
@@ -84,10 +108,123 @@ function bindEvents() {
   document.getElementById("start-demo").onclick = startDemo;
   document.getElementById("q-submit").onclick = submitAnswer;
   document.getElementById("q-skip").onclick = () => submitAnswer(true);
-  document.getElementById("restart").onclick = () => showScreen("setup");
+  document.getElementById("restart").onclick = () => { refreshNotesCountHint(); showScreen("setup"); };
+
+  // Notes: autosave as the user types (debounced)
+  const notesArea = document.getElementById("q-notes");
+  if (notesArea) {
+    let t = null;
+    notesArea.addEventListener("input", () => {
+      const cid = notesArea.dataset.categoryId;
+      if (!cid) return;
+      const status = document.getElementById("notes-status");
+      if (status) status.textContent = "Saving…";
+      clearTimeout(t);
+      t = setTimeout(() => {
+        setNote(cid, notesArea.value);
+        if (status) status.textContent = "Saved";
+      }, 400);
+    });
+  }
+
+  // Export buttons (all wired to the same downloader)
+  ["notes-download-setup", "notes-download-quiz", "notes-download-results"].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.onclick = downloadAllNotes;
+  });
+
+  refreshNotesCountHint();
+}
+
+function refreshNotesCountHint() {
+  const notes = loadAllNotes();
+  const entries = Object.entries(notes).filter(([, v]) => (v || "").trim());
+  const n = entries.length;
+
+  const hint = document.getElementById("notes-count-hint");
+  if (hint) {
+    hint.textContent = n === 0
+      ? "No category notes saved yet — add some during a quiz."
+      : `${n} categor${n === 1 ? "y has" : "ies have"} saved notes. Click to expand.`;
+  }
+
+  const body = document.getElementById("notes-panel-body");
+  if (!body) return;
+  const empty = document.getElementById("notes-panel-empty");
+  // Strip dynamically inserted items but keep the empty placeholder.
+  [...body.querySelectorAll(".notes-panel-item")].forEach(el => el.remove());
+
+  if (n === 0) {
+    if (empty) empty.style.display = "";
+    return;
+  }
+  if (empty) empty.style.display = "none";
+
+  const cats = state.categories || [];
+  const catById = Object.fromEntries(cats.map(c => [c.id, c]));
+  // Sort: by group then by name
+  entries.sort(([a], [b]) => {
+    const ca = catById[a] || { group: "~", name: a };
+    const cb = catById[b] || { group: "~", name: b };
+    return (ca.group || "").localeCompare(cb.group || "") || (ca.name || "").localeCompare(cb.name || "");
+  });
+
+  for (const [cid, text] of entries) {
+    const cat = catById[cid] || { id: cid, name: cid, group: "Uncategorized" };
+    const item = document.createElement("details");
+    item.className = "notes-panel-item";
+
+    const summary = document.createElement("summary");
+    summary.innerHTML = `<span class="notes-item-group">${escapeHtml(cat.group)}</span>
+      <span class="notes-item-name">${escapeHtml(cat.name)}</span>
+      <span class="notes-item-preview">${escapeHtml(text.slice(0, 70))}${text.length > 70 ? "…" : ""}</span>`;
+    item.appendChild(summary);
+
+    const ta = document.createElement("textarea");
+    ta.className = "notes-item-textarea";
+    ta.rows = 6;
+    ta.value = text;
+    ta.dataset.categoryId = cid;
+
+    const status = document.createElement("div");
+    status.className = "notes-item-status fine-print";
+    status.textContent = "Saved";
+
+    let tHandle = null;
+    ta.addEventListener("input", () => {
+      status.textContent = "Saving…";
+      clearTimeout(tHandle);
+      tHandle = setTimeout(() => {
+        setNote(cid, ta.value);
+        status.textContent = ta.value.trim() ? "Saved" : "Empty — will not be exported";
+        // Refresh the preview in the summary
+        summary.querySelector(".notes-item-preview").textContent =
+          ta.value.slice(0, 70) + (ta.value.length > 70 ? "…" : "");
+      }, 400);
+    });
+
+    item.appendChild(ta);
+    item.appendChild(status);
+    body.appendChild(item);
+  }
+}
+
+function loadNoteForCurrentQuestion() {
+  const q = state.questions[state.idx];
+  if (!q) return;
+  const notesArea = document.getElementById("q-notes");
+  const catName = document.getElementById("notes-cat-name");
+  const status = document.getElementById("notes-status");
+  if (!notesArea) return;
+  notesArea.dataset.categoryId = q.category_id;
+  notesArea.value = getNote(q.category_id);
+  if (catName) catName.textContent = categoryName(q.category_id);
+  if (status) status.textContent = notesArea.value ? "Saved" : "";
 }
 
 function setAllCats(on) {
+  // ui.js renders categories as <button class="cat-chip-btn">; keep checkbox-fallback for safety.
+  document.querySelectorAll(".cat-chip-btn").forEach(b => b.classList.toggle("selected", on));
   document.querySelectorAll("#categories input[type=checkbox]").forEach(cb => cb.checked = on);
 }
 
@@ -181,11 +318,20 @@ function renderQuestion() {
   document.getElementById("progress-bar").style.width = pct + "%";
   document.getElementById("progress-text").textContent =
     `Question ${state.idx + 1} of ${state.questions.length}`;
+  loadNoteForCurrentQuestion();
 }
 
 async function submitAnswer(skipped = false) {
+  // Normalize: click handlers pass the event as the first arg, which must NOT be treated as "skipped".
+  skipped = (skipped === true);
+
   const q = state.questions[state.idx];
-  const answer = skipped === true ? "" : document.getElementById("q-answer").value.trim();
+  // Flush any pending note edits immediately so nothing is lost on fast-advance.
+  const notesArea = document.getElementById("q-notes");
+  if (notesArea && notesArea.dataset.categoryId) {
+    setNote(notesArea.dataset.categoryId, notesArea.value);
+  }
+  const answer = skipped ? "" : document.getElementById("q-answer").value.trim();
   const status = document.getElementById("q-status");
   const submitBtn = document.getElementById("q-submit");
   const skipBtn = document.getElementById("q-skip");
@@ -243,7 +389,10 @@ async function callClaude({ system, user, temperature, maxTokens }) {
   });
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`HTTP ${res.status}: ${text.slice(0, 200)}`);
+    if (res.status === 401) {
+      throw new Error("Anthropic rejected the key (401). Double-check the key you pasted starts with sk-ant-, has no trailing spaces, and is active in https://console.anthropic.com/settings/keys.");
+    }
+    throw new Error(`HTTP ${res.status}: ${text.slice(0, 240)}`);
   }
   const data = await res.json();
   const text = data.content?.map(b => b.text).filter(Boolean).join("\n") ?? "";
@@ -452,6 +601,54 @@ function renderPerQuestionDemo(container) {
       <ul class="tight">${(r.strong_answer_outline || []).map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>`;
     container.appendChild(div);
   }
+}
+
+// ---- Notes export ----
+
+function downloadAllNotes() {
+  const notes = loadAllNotes();
+  const cats = state.categories || [];
+  const catById = Object.fromEntries(cats.map(c => [c.id, c]));
+
+  // Group by category group, then sort by category name within group.
+  const grouped = {};
+  for (const [cid, text] of Object.entries(notes)) {
+    if (!text || !text.trim()) continue;
+    const cat = catById[cid] || { id: cid, name: cid, group: "Uncategorized" };
+    (grouped[cat.group] ||= []).push({ cat, text });
+  }
+  for (const g of Object.keys(grouped)) {
+    grouped[g].sort((a, b) => a.cat.name.localeCompare(b.cat.name));
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const lines = [
+    `# Interview Prepper — Notes`,
+    ``,
+    `_Exported ${today}_`,
+    ``,
+  ];
+  const groupOrder = Object.keys(grouped).sort();
+  if (groupOrder.length === 0) {
+    lines.push(`_No notes saved yet._`, ``);
+  }
+  for (const g of groupOrder) {
+    lines.push(`## ${g}`, ``);
+    for (const { cat, text } of grouped[g]) {
+      lines.push(`### ${cat.name}`, ``, text.trim(), ``);
+    }
+  }
+  const md = lines.join("\n");
+
+  const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `interview-prepper-notes-${today}.md`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // ---- Helpers ----

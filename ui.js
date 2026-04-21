@@ -89,16 +89,26 @@ const LEVEL_HINTS = {
 (function initStepper() {
   const hidden  = document.getElementById("num-questions");
   const display = document.getElementById("num-display");
-  let val = 5;
+  if (!hidden || !display) return;
 
-  function update(v) {
-    val = Math.max(1, Math.min(20, v));
-    display.textContent = val;
-    hidden.value = val;
+  function currentVal() {
+    const fromHidden = parseInt(hidden.value, 10);
+    if (!Number.isNaN(fromHidden)) return fromHidden;
+    const fromDisplay = parseInt(display.textContent, 10);
+    return Number.isNaN(fromDisplay) ? 5 : fromDisplay;
   }
 
-  document.getElementById("num-dec").addEventListener("click", () => update(val - 1));
-  document.getElementById("num-inc").addEventListener("click", () => update(val + 1));
+  function update(v) {
+    const clamped = Math.max(1, Math.min(20, v));
+    display.textContent = clamped;
+    hidden.value = clamped;
+  }
+
+  // initialize both sides from whichever was set
+  update(currentVal());
+
+  document.getElementById("num-dec").addEventListener("click", () => update(currentVal() - 1));
+  document.getElementById("num-inc").addEventListener("click", () => update(currentVal() + 1));
 })();
 
 // ── Mode card toggle ─────────────────────────────────

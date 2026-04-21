@@ -40,6 +40,34 @@
         "One sentence: what you're looking for and why this role.",
         "Calibrated vocabulary; no rambling."
       ]
+    },
+    {
+      "category_id": "stats",
+      "question": "A coin is flipped 10 times and lands heads 8 times. Is it fair?",
+      "strong_answer_outline": [
+        "State null: coin is fair (p=0.5). Compute P(≥8 heads | fair) via binomial ≈ 0.055.",
+        "Interpret: marginal at α=0.05; not strong evidence, small sample.",
+        "Mention confidence interval or Bayesian posterior as alternative framings.",
+        "Caveat: base rate / prior beliefs about coin fairness."
+      ]
+    },
+    {
+      "category_id": "star",
+      "question": "Tell me about a time you made a mistake at work. What did you do?",
+      "strong_answer_outline": [
+        "Concrete situation + what went wrong + your role in it.",
+        "Actions: how you surfaced it, contained damage, communicated.",
+        "Result + explicit lesson / process change you made after."
+      ]
+    },
+    {
+      "category_id": "ab_testing",
+      "question": "What is p-hacking and how do you avoid it?",
+      "strong_answer_outline": [
+        "Repeatedly testing / peeking until something looks significant.",
+        "Causes: multiple comparisons, early stopping, HARKing.",
+        "Mitigations: pre-register hypotheses, fix sample size, Bonferroni / FDR, sequential testing methods."
+      ]
     }
   ],
 
@@ -84,6 +112,36 @@
         "Decision: usually no — run full duration, pre-commit primary metric + SRM check.",
         "Mention multiple-testing concerns."
       ]
+    },
+    {
+      "category_id": "coding_python",
+      "question": "You have a pandas DataFrame with `user_id`, `event_time`, `event_type`. Compute each user's time between their first and last event. How would you do it, and what edge cases matter?",
+      "strong_answer_outline": [
+        "`df.groupby('user_id')['event_time'].agg(['min','max'])`; subtract for duration.",
+        "Ensure `event_time` is datetime; handle timezones.",
+        "Edge cases: single-event users (duration=0), NaT, out-of-order events.",
+        "Bonus: vectorized vs apply; memory on large groupbys."
+      ]
+    },
+    {
+      "category_id": "sysdesign_backend",
+      "question": "Design a rate limiter that supports 1k QPS per user across multiple API servers. Walk me through your approach.",
+      "strong_answer_outline": [
+        "Algorithm choice: token bucket vs fixed/sliding window; tradeoffs.",
+        "Shared state: Redis (atomic INCR + EXPIRE) vs local + gossip.",
+        "Failure modes: Redis down → fail-open vs fail-closed; stampede on expiry.",
+        "Observability: per-user / per-route counters, 429 response with Retry-After."
+      ]
+    },
+    {
+      "category_id": "past_experience",
+      "question": "Tell me about a production ML system you've owned. What did you measure, and what broke?",
+      "strong_answer_outline": [
+        "Concrete system: scope, users, business metric.",
+        "Monitoring stack: model metrics (latency, throughput) vs data metrics (drift, skew).",
+        "A specific incident: detection → diagnosis → fix → prevention.",
+        "Senior signal: tradeoffs made, not just what shipped."
+      ]
     }
   ],
 
@@ -118,6 +176,26 @@
         "Named tradeoff and why.",
         "Reflection: heuristic you now use to make that call faster.",
         "Staff signal: second-order effects, team/org cost, not just code cost."
+      ]
+    },
+    {
+      "category_id": "llm",
+      "question": "Your org wants to 'use LLMs everywhere'. How do you decide which problems actually benefit from an LLM vs a simpler model or rules?",
+      "strong_answer_outline": [
+        "Framework: problem requires open-ended NL understanding / generation? Is data structured?",
+        "Cost / latency / reliability budget vs alternatives (BERT finetune, rules, classical ML).",
+        "Evaluation story: how do you know it's working in production.",
+        "Staff signal: pushing back on hype, framing org capability gaps, build-vs-buy."
+      ]
+    },
+    {
+      "category_id": "star",
+      "question": "Tell me about a time you led a project across multiple teams without formal authority. How did you get alignment?",
+      "strong_answer_outline": [
+        "Situation: cross-team scope, why it needed coordination.",
+        "Actions: how you built buy-in — shared doc, metrics, escalation paths.",
+        "Result: shipped outcome and what you learned about influencing at scale.",
+        "Staff signal: not just communication, but designing the collaboration structure."
       ]
     }
   ]

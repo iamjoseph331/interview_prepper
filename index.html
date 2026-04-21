@@ -93,6 +93,23 @@
       </div>
 
       <div id="setup-error" class="error-msg"></div>
+
+      <details class="notes-panel" id="notes-panel">
+        <summary class="notes-panel-summary">
+          <div>
+            <div class="section-label" style="margin-bottom:4px">Your notes</div>
+            <div class="fine-print" id="notes-count-hint">No category notes saved yet — add some during a quiz.</div>
+          </div>
+          <span class="notes-expand-caret" aria-hidden="true">▾</span>
+        </summary>
+        <div class="notes-panel-body" id="notes-panel-body">
+          <p class="fine-print" id="notes-panel-empty">You haven't saved any category notes yet. Start a quiz — there's a notes panel next to each question.</p>
+        </div>
+        <div class="notes-panel-footer">
+          <span class="fine-print">Notes live only for this browser session and are cleared when you close the tab.</span>
+          <button type="button" class="ghost-btn" id="notes-download-setup">Export as .md</button>
+        </div>
+      </details>
     </section>
 
     <!-- QUIZ SCREEN -->
@@ -101,18 +118,30 @@
         <span id="progress-text" class="progress-label">Question 1 of 5</span>
         <div class="progress-track"><div id="progress-bar"></div></div>
       </div>
-      <div class="quiz-card">
-        <div class="q-meta">
-          <span class="q-cat-chip" id="q-category"></span>
-          <span class="q-level-chip" id="q-level-chip"></span>
+      <div class="quiz-layout">
+        <div class="quiz-card">
+          <div class="q-meta">
+            <span class="q-cat-chip" id="q-category"></span>
+            <span class="q-level-chip" id="q-level-chip"></span>
+          </div>
+          <h2 id="q-text" class="q-text"></h2>
+          <textarea id="q-answer" rows="9" placeholder="Type your answer here — aim for 2–5 minutes of spoken content."></textarea>
+          <div class="quiz-actions">
+            <button id="q-skip" class="ghost-btn">Skip</button>
+            <button id="q-submit" class="primary-btn">Submit →</button>
+          </div>
+          <div id="q-status" class="status-msg"></div>
         </div>
-        <h2 id="q-text" class="q-text"></h2>
-        <textarea id="q-answer" rows="9" placeholder="Type your answer here — aim for 2–5 minutes of spoken content."></textarea>
-        <div class="quiz-actions">
-          <button id="q-skip" class="ghost-btn">Skip</button>
-          <button id="q-submit" class="primary-btn">Submit →</button>
-        </div>
-        <div id="q-status" class="status-msg"></div>
+        <aside class="quiz-notes">
+          <div class="notes-header">
+            <span class="notes-label">Notes · <span id="notes-cat-name">—</span></span>
+            <span class="notes-status" id="notes-status"></span>
+          </div>
+          <textarea id="q-notes" rows="14" placeholder="Personal notes for this category. Saved locally (this browser only). Shown again whenever a question from this category comes up."></textarea>
+          <div class="notes-footer">
+            <button type="button" class="ghost-btn small" id="notes-download-quiz">Export all notes (.md)</button>
+          </div>
+        </aside>
       </div>
     </section>
 
@@ -123,7 +152,10 @@
       </div>
       <div id="summary" class="results-summary-card"></div>
       <div id="per-question"></div>
-      <button id="restart" class="primary-btn" style="margin-top:24px">New session →</button>
+      <div class="results-actions">
+        <button id="restart" class="primary-btn">New session →</button>
+        <button type="button" class="ghost-btn" id="notes-download-results">Export notes (.md)</button>
+      </div>
     </section>
 
   </main>
