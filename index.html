@@ -54,6 +54,18 @@
       </div>
 
       <div class="section-label" style="margin-top:28px">Mode</div>
+      <div class="keyala-bar">
+        <div id="keyala-off">
+          <div class="mode-title">No key to paste? Use Keyala</div>
+          <div class="mode-desc">Your Claude key stays in the <a href="https://keyala.io/" target="_blank" rel="noopener">Keyala</a> app. You approve each call on your phone.</div>
+        </div>
+        <div id="keyala-on" hidden>
+          <div class="mode-title">Connected with Keyala</div>
+          <div class="mode-desc">Calls use your own key. Approve them in the Keyala app.</div>
+        </div>
+        <button type="button" id="keyala-connect" class="ghost-btn small">Connect Keyala</button>
+        <button type="button" id="keyala-disconnect" class="ghost-btn small">Disconnect</button>
+      </div>
       <div class="mode-cards">
         <div class="mode-card" id="mode-api-card">
           <div class="mode-card-header">
@@ -65,7 +77,7 @@
             <button class="mode-toggle-btn" id="mode-api-toggle">Configure</button>
           </div>
           <div class="mode-card-body" id="mode-api-body" style="display:none">
-            <label class="field-label">Anthropic API key
+            <label class="field-label needs-key">Anthropic API key
               <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
             </label>
             <label class="field-label">Model
@@ -75,7 +87,7 @@
                 <option value="claude-opus-4-7">Opus 4.7 — highest quality</option>
               </select>
             </label>
-            <p class="fine-print">Your key stays in <code>sessionStorage</code> and is only sent to <code>api.anthropic.com</code>. Cleared when you close this tab.</p>
+            <p class="fine-print needs-key">Your key stays in <code>sessionStorage</code> and is only sent to <code>api.anthropic.com</code>. Cleared when you close this tab.</p>
             <button id="start-api" class="primary-btn">Start graded session →</button>
           </div>
         </div>
@@ -88,6 +100,39 @@
               <div class="mode-desc">Pre-baked questions, self-study outlines</div>
             </div>
             <button id="start-demo" class="primary-btn small">Start →</button>
+          </div>
+        </div>
+
+        <div class="mode-card" id="mode-jd-card">
+          <div class="mode-card-header">
+            <span class="mode-icon">⚑</span>
+            <div>
+              <div class="mode-title">JD mode</div>
+              <div class="mode-desc">Generate questions from a job description</div>
+            </div>
+            <button class="mode-toggle-btn" id="mode-jd-toggle">Configure</button>
+          </div>
+          <div class="mode-card-body" id="mode-jd-body" style="display:none">
+            <label class="field-label">Job description
+              <div class="jd-upload-row">
+                <input type="file" id="jd-file" accept=".md,.txt" style="display:none" />
+                <button type="button" id="jd-file-btn" class="ghost-btn small">Upload file</button>
+                <span id="jd-file-name" class="jd-file-label"></span>
+              </div>
+              <textarea id="jd-text" rows="8" placeholder="…or paste the job description here (Markdown or plain text)"></textarea>
+            </label>
+            <label class="field-label needs-key">Anthropic API key
+              <input type="password" id="jd-api-key" placeholder="sk-ant-…" autocomplete="off" />
+            </label>
+            <label class="field-label">Model
+              <select id="jd-model">
+                <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — balanced (default)</option>
+                <option value="claude-haiku-4-5-20251001">Haiku 4.5 — fast &amp; cheap</option>
+                <option value="claude-opus-4-7">Opus 4.7 — highest quality</option>
+              </select>
+            </label>
+            <p class="fine-print">Questions are generated and graded based on the role. Notes are stored in a separate "Job Description" category.</p>
+            <button id="start-jd-btn" class="primary-btn">Start JD session →</button>
           </div>
         </div>
       </div>

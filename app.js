@@ -8,6 +8,25 @@
 const API_URL = "https://api.anthropic.com/v1/messages";
 const ANTHROPIC_VERSION = "2023-06-01";
 
+// ---- Keyala (optional): use your own Claude key without pasting it here ----
+// The page only holds a grant token; the key stays in the visitor's Keyala account and each call
+// is approved on their phone. Local testing: ?ky=http://localhost:8080&app=app_interview_prepper
+const KY_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
+const KY_QS = new URLSearchParams(location.search);
+const KEYALA_URL = ((KY_LOCAL && KY_QS.get("ky")) || { staging: "https://staging.keyala.io" }[KY_QS.get("server")] || "https://app.keyala.io").replace(/\/$/, "");
+const KEYALA_APP = (KY_LOCAL && KY_QS.get("app")) || "app_interview_prepper";
+// Must match Keyala's model allowlist.
+const KEYALA_MODELS = [
+  ["claude-sonnet-5-5", "Sonnet 5.5 — balanced (default)"],
+  ["claude-haiku-5-5", "Haiku 5.5 — fast & cheap"],
+  ["claude-opus-5-5", "Opus 5.5 — highest quality"],
+];
+const GRANT_KEY = "interviewPrepperKeyalaGrant:" + KEYALA_URL;
+const grantStore = {
+  get: () => { try { return localStorage.getItem(GRANT_KEY) || ""; } catch { return ""; } },
+  set: (t) => { try { t ? localStorage.setItem(GRANT_KEY, t) : localStorage.removeItem(GRANT_KEY); } catch {} },
+};
+
 const SYSTEM_PROMPT = `You are a senior AI/ML hiring manager designing and grading interview questions.
 
 Target level definitions:
@@ -56,7 +75,7 @@ function setNote(categoryId, text) {
 const state = {
   categories: [],
   samples: {},
-  mode: null,        // 'api' | 'demo'
+  mode: null,        // 'api' | 'demo' | 'jd'
   level: "Junior",
   selectedIds: new Set(),
   numQuestions: 5,
@@ -65,6 +84,9 @@ const state = {
   questions: [],     // [{category_id, question, expected_signals?}]
   idx: 0,
   results: [],       // [{question, answer, evaluation}]
+  jd: "",            // raw job description markdown
+  jdTitle: "",       // extracted/fallback job title
+  grant: grantStore.get(), // Keyala grant token, if connected
 };
 window.state = state; // expose for ui.js
 
@@ -106,6 +128,10 @@ function bindEvents() {
   document.getElementById("cat-none").onclick = () => setAllCats(false);
   document.getElementById("start-api").onclick = startApi;
   document.getElementById("start-demo").onclick = startDemo;
+  document.getElementById("start-jd-btn").onclick = startJd;
+  document.getElementById("keyala-connect").onclick = connectKeyala;
+  document.getElementById("keyala-disconnect").onclick = () => setGrant("");
+  renderKeyala();
   document.getElementById("q-submit").onclick = submitAnswer;
   document.getElementById("q-skip").onclick = () => submitAnswer(true);
   document.getElementById("restart").onclick = () => { refreshNotesCountHint(); showScreen("setup"); };
@@ -162,15 +188,19 @@ function refreshNotesCountHint() {
 
   const cats = state.categories || [];
   const catById = Object.fromEntries(cats.map(c => [c.id, c]));
+  function resolveCat(cid) {
+    if (cid === "jd_session") return { id: cid, name: state.jdTitle || "Job Description", group: "Job Description" };
+    return catById[cid] || { id: cid, name: cid, group: "Uncategorized" };
+  }
   // Sort: by group then by name
   entries.sort(([a], [b]) => {
-    const ca = catById[a] || { group: "~", name: a };
-    const cb = catById[b] || { group: "~", name: b };
+    const ca = resolveCat(a);
+    const cb = resolveCat(b);
     return (ca.group || "").localeCompare(cb.group || "") || (ca.name || "").localeCompare(cb.name || "");
   });
 
   for (const [cid, text] of entries) {
-    const cat = catById[cid] || { id: cid, name: cid, group: "Uncategorized" };
+    const cat = resolveCat(cid);
     const item = document.createElement("details");
     item.className = "notes-panel-item";
 
@@ -261,7 +291,7 @@ function showScreen(id) {
 async function startApi() {
   readSetup();
   if (state.selectedIds.size === 0) { showError("Pick at least one category."); return; }
-  if (!state.apiKey) { showError("API key is required for graded mode."); return; }
+  if (!state.apiKey && !state.grant) { showError("Paste an API key or connect Keyala first."); return; }
   state.mode = "api";
   sessionStorage.setItem("apiKey", state.apiKey);
   showError("");
@@ -301,9 +331,70 @@ function startDemo() {
   showScreen("quiz");
 }
 
+async function startJd() {
+  const jdText = document.getElementById("jd-text").value.trim();
+  const apiKey = document.getElementById("jd-api-key").value.trim();
+  const model  = document.getElementById("jd-model").value;
+  if (!jdText) { showError("Paste or upload a job description first."); return; }
+  if (!apiKey && !state.grant) { showError("Paste an API key or connect Keyala first."); return; }
+
+  readSetup(); // reads level + numQuestions from shared controls
+  state.apiKey = apiKey;
+  state.model  = model;
+  state.jd     = jdText;
+  // Extract first markdown heading as the job title, fallback to "Job Description"
+  const headingMatch = jdText.match(/^#{1,3}\s+(.+)/m);
+  state.jdTitle = headingMatch ? headingMatch[1].trim() : "Job Description";
+  state.mode = "jd";
+  showError("");
+
+  const btn = document.getElementById("start-jd-btn");
+  btn.disabled = true; btn.textContent = "Generating questions…";
+  try {
+    state.questions = await generateJdQuestions();
+    state.idx = 0;
+    state.results = [];
+    renderQuestion();
+    showScreen("quiz");
+  } catch (e) {
+    showError("Generation failed: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Start JD session →";
+  }
+}
+
+async function generateJdQuestions() {
+  const user = `You are generating interview questions for this specific job posting.
+
+=== JOB DESCRIPTION ===
+${state.jd}
+=== END JOB DESCRIPTION ===
+
+Generate ${state.numQuestions} interview questions calibrated for a ${state.level}-level candidate applying to this role.
+Mix question types relevant to the JD: technical depth, role-specific scenarios, and behavioral questions tied to the responsibilities listed.
+For every question, set category_id to "jd_session".
+
+Return STRICT JSON — an array of objects with this exact shape:
+[
+  {
+    "category_id": "jd_session",
+    "question": "<the question text>",
+    "expected_signals": ["3 to 5 short bullets describing what a strong answer contains"]
+  }
+]`;
+
+  const text = await callClaude({ system: SYSTEM_PROMPT, user, temperature: 1, maxTokens: 3000 });
+  const parsed = extractJson(text);
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error("Model did not return a question array.");
+  }
+  return parsed;
+}
+
 // ---- Quiz rendering ----
 
 function categoryName(id) {
+  if (id === "jd_session") return state.jdTitle || "Job Description";
   const c = state.categories.find(x => x.id === id);
   return c ? c.name : id;
 }
@@ -337,7 +428,7 @@ async function submitAnswer(skipped = false) {
   const skipBtn = document.getElementById("q-skip");
 
   let evaluation = null;
-  if (state.mode === "api" && !skipped && answer) {
+  if ((state.mode === "api" || state.mode === "jd") && !skipped && answer) {
     submitBtn.disabled = true; skipBtn.disabled = true;
     status.textContent = "Grading…";
     try {
@@ -377,6 +468,7 @@ async function callClaude({ system, user, temperature, maxTokens }) {
     system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: user }],
   };
+  if (state.grant) return callKeyala({ ...body, system }); // Keyala forwards plain text only (no cache_control)
   const res = await fetch(API_URL, {
     method: "POST",
     headers: {
@@ -397,6 +489,84 @@ async function callClaude({ system, user, temperature, maxTokens }) {
   const data = await res.json();
   const text = data.content?.map(b => b.text).filter(Boolean).join("\n") ?? "";
   return text;
+}
+
+// Same request body, sent to Keyala with the grant instead of a key. No retries: a slow phone
+// approval answers 202 and we poll; the Idempotency-Key keeps a resent call from running twice.
+async function callKeyala(body) {
+  const auth = { Authorization: "Bearer " + state.grant };
+  let res = await fetch(KEYALA_URL + "/v1/anthropic/messages", {
+    method: "POST",
+    headers: { ...auth, "content-type": "application/json", "Idempotency-Key": crypto.randomUUID(), "X-Keyala-Wait": "25" },
+    body: JSON.stringify(body),
+  });
+  let data = await res.json().catch(() => ({}));
+  while (res.status === 202) {
+    setKeyalaStatus("Waiting for approval on your phone…");
+    await new Promise(r => setTimeout(r, 1500));
+    const p = await fetch(KEYALA_URL + "/v1/requests/" + encodeURIComponent(data.request_id), { headers: auth });
+    const pj = await p.json().catch(() => ({}));
+    if (p.status !== 200) { res = p; data = pj; break; }
+    if (pj.status === "completed") { res = { status: 200 }; data = pj.response || {}; break; }
+    if (pj.status === "denied") { res = { status: 403 }; data = { error: { type: "keyala_denied" } }; break; }
+    if (pj.status === "expired") { res = { status: 410 }; break; }
+    if (pj.status === "failed" || pj.status === "uncertain") {
+      throw new Error(pj.response?.error?.message || `Keyala request ${pj.status}.`);
+    }
+  }
+  setKeyalaStatus("");
+  if (res.status === 200) return data.content?.map(b => b.text).filter(Boolean).join("\n") ?? "";
+  if (res.status === 401) { setGrant(""); throw new Error("Your Keyala connection ended (revoked in the app?). Connect again."); }
+  if (res.status === 403 && data.error?.type === "keyala_denied") throw new Error("You denied this call in Keyala.");
+  if (res.status === 410) throw new Error("The call was not approved in time. Try again.");
+  throw new Error(data.error?.message || `Keyala returned ${res.status}`);
+}
+
+function setKeyalaStatus(msg) {
+  const onQuiz = document.getElementById("quiz").classList.contains("active");
+  const el = document.getElementById(onQuiz ? "q-status" : "setup-error");
+  if (msg || !onQuiz) el.textContent = msg;
+}
+
+// Connect / disconnect UI. Pairing is Keyala's web SDK, loaded from the Keyala server on demand.
+const DIRECT_MODEL_OPTIONS = {};
+function setGrant(token) {
+  state.grant = token;
+  grantStore.set(token);
+  renderKeyala();
+}
+function renderKeyala() {
+  const on = !!state.grant;
+  document.getElementById("keyala-off").hidden = on;
+  document.getElementById("keyala-on").hidden = !on;
+  document.querySelectorAll(".needs-key").forEach(el => { el.hidden = on; });
+  for (const id of ["model", "jd-model"]) {
+    const sel = document.getElementById(id);
+    DIRECT_MODEL_OPTIONS[id] ??= sel.innerHTML;
+    if (on) sel.replaceChildren(...KEYALA_MODELS.map(([v, l]) => new Option(l, v)));
+    else sel.innerHTML = DIRECT_MODEL_OPTIONS[id];
+  }
+}
+let keyalaSdk = null;
+async function connectKeyala() {
+  const btn = document.getElementById("keyala-connect");
+  btn.disabled = true;
+  showError("");
+  try {
+    keyalaSdk ??= new Promise((ok, no) => {
+      const s = document.createElement("script");
+      s.src = KEYALA_URL + "/sdk/keyala.js"; s.onload = ok; s.onerror = no;
+      document.head.append(s);
+    });
+    await keyalaSdk;
+    const g = await Keyala.connect({ app: KEYALA_APP, vendor: "anthropic", server: KEYALA_URL });
+    setGrant(g.grant_token);
+  } catch (e) {
+    keyalaSdk = e && e.code ? keyalaSdk : null; // script failed to load: allow a retry
+    if (!e || e.code !== "cancelled") showError(e && e.code === "denied" ? "Connection denied in Keyala." : (e && e.message) || "Could not reach Keyala at " + KEYALA_URL);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 function extractJson(text) {
@@ -520,7 +690,7 @@ async function finishSession() {
   const perQ = document.getElementById("per-question");
   perQ.innerHTML = "";
 
-  if (state.mode === "api") {
+  if (state.mode === "api" || state.mode === "jd") {
     summary.innerHTML = `<p class="small">Computing final evaluation…</p>`;
     let final = null;
     try {
@@ -614,7 +784,9 @@ function downloadAllNotes() {
   const grouped = {};
   for (const [cid, text] of Object.entries(notes)) {
     if (!text || !text.trim()) continue;
-    const cat = catById[cid] || { id: cid, name: cid, group: "Uncategorized" };
+    const cat = cid === "jd_session"
+      ? { id: cid, name: state.jdTitle || "Job Description", group: "Job Description" }
+      : (catById[cid] || { id: cid, name: cid, group: "Uncategorized" });
     (grouped[cat.group] ||= []).push({ cat, text });
   }
   for (const g of Object.keys(grouped)) {

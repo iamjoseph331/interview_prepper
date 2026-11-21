@@ -113,13 +113,36 @@ const LEVEL_HINTS = {
 
 // ── Mode card toggle ─────────────────────────────────
 (function initModeCards() {
-  const toggleBtn = document.getElementById("mode-api-toggle");
-  const body      = document.getElementById("mode-api-body");
-  if (!toggleBtn || !body) return;
-  toggleBtn.addEventListener("click", () => {
-    const open = body.style.display !== "none";
-    body.style.display = open ? "none" : "flex";
-    toggleBtn.textContent = open ? "Configure" : "Collapse";
+  function bindToggle(toggleId, bodyId) {
+    const btn  = document.getElementById(toggleId);
+    const body = document.getElementById(bodyId);
+    if (!btn || !body) return;
+    btn.addEventListener("click", () => {
+      const open = body.style.display !== "none";
+      body.style.display = open ? "none" : "flex";
+      btn.textContent = open ? "Configure" : "Collapse";
+    });
+  }
+  bindToggle("mode-api-toggle", "mode-api-body");
+  bindToggle("mode-jd-toggle",  "mode-jd-body");
+})();
+
+// ── JD file upload ───────────────────────────────────
+(function initJdUpload() {
+  const fileInput  = document.getElementById("jd-file");
+  const fileBtn    = document.getElementById("jd-file-btn");
+  const fileLabel  = document.getElementById("jd-file-name");
+  const textArea   = document.getElementById("jd-text");
+  if (!fileInput || !fileBtn || !textArea) return;
+
+  fileBtn.addEventListener("click", () => fileInput.click());
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+    if (fileLabel) fileLabel.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => { textArea.value = e.target.result; };
+    reader.readAsText(file);
   });
 })();
 
