@@ -27,7 +27,7 @@ That's it — everything is static. A `.nojekyll` file is included so Pages serv
 - **Demo mode** — no API key needed. Uses pre-baked questions from `samples.json` and shows a "strong-answer outline" after each attempt for self-comparison. No grading.
 - **Graded mode** — you paste your own Anthropic API key (`sk-ant-…`). The app generates fresh questions and scores each answer on 5 dimensions (Correctness, Depth, Clarity, Practical grounding, Level appropriateness) with a final session evaluation.
 
-- **Connect Keyala** — no key to paste. Press *Connect Keyala*, scan the QR with the [Keyala](https://keyala.io/) iPhone app, and approve each call on your phone. Your Claude key stays in Keyala; this page only holds a revocable grant token (in `localStorage`). Works with Graded and JD mode, using Claude Sonnet / Haiku / Opus 5.5. Local testing against a Keyala dev server: `?ky=http://localhost:8080&app=app_interview_prepper`.
+- **Connect Keyala** — no key to paste. Press *Connect Keyala*, scan the QR with the [Keyala](https://keyala.io/) iPhone app, and approve each call on your phone. Your Claude key stays in Keyala; this page only holds a revocable grant token (in `localStorage`). Works with Graded and JD mode, using Claude Sonnet / Haiku / Opus 5.5. Local testing against a Keyala dev server: `?ky=http://localhost:8080&app=<your local app id>`.
 
 ### About the API key
 

@@ -10,11 +10,11 @@ const ANTHROPIC_VERSION = "2023-06-01";
 
 // ---- Keyala (optional): use your own Claude key without pasting it here ----
 // The page only holds a grant token; the key stays in the visitor's Keyala account and each call
-// is approved on their phone. Local testing: ?ky=http://localhost:8080&app=app_interview_prepper
+// is approved on their phone. Local testing: ?ky=http://localhost:8080&app=app_your_local_app
 const KY_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 const KY_QS = new URLSearchParams(location.search);
 const KEYALA_URL = ((KY_LOCAL && KY_QS.get("ky")) || { staging: "https://staging.keyala.io" }[KY_QS.get("server")] || "https://app.keyala.io").replace(/\/$/, "");
-const KEYALA_APP = (KY_LOCAL && KY_QS.get("app")) || "app_interview_prepper";
+const KEYALA_APP = (KY_LOCAL && KY_QS.get("app")) || "app_Rpn-CSztda_eFOZa";
 // Must match Keyala's model allowlist.
 const KEYALA_MODELS = [
   ["claude-sonnet-5-5", "Sonnet 5.5 — balanced (default)"],
