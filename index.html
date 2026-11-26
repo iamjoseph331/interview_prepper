@@ -54,6 +54,17 @@
       </div>
 
       <div class="section-label" style="margin-top:28px">Mode</div>
+      <div class="key-bar needs-key">
+        <label class="field-label" for="api-key">Paste your Anthropic API key</label>
+        <ol class="key-steps">
+          <li>Create an account at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>.</li>
+          <li>Add a payment method and buy API credits (separate from a Claude subscription).</li>
+          <li>Create a key and paste the whole <code>sk-ant-…</code> here.</li>
+        </ol>
+        <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
+        <p class="fine-print">This page can read your key. It only sends it to <code>api.anthropic.com</code> and keeps it in this tab, but you have to take our word for that. Every call is charged with no confirmation, and stopping it means deleting the key in Anthropic's console.</p>
+      </div>
+      <div class="or-sep needs-key"><span>or</span></div>
       <div class="keyala-bar">
         <div id="keyala-off">
           <div class="mode-title">No key to paste? Use Keyala</div>
@@ -77,9 +88,6 @@
             <button class="mode-toggle-btn" id="mode-api-toggle">Configure</button>
           </div>
           <div class="mode-card-body" id="mode-api-body" style="display:none">
-            <label class="field-label needs-key">Anthropic API key
-              <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off" />
-            </label>
             <label class="field-label">Model
               <select id="model">
                 <option value="claude-sonnet-4-6" selected>Sonnet 4.6 — balanced (default)</option>
@@ -87,7 +95,6 @@
                 <option value="claude-opus-4-7">Opus 4.7 — highest quality</option>
               </select>
             </label>
-            <p class="fine-print needs-key">Your key stays in <code>sessionStorage</code> and is only sent to <code>api.anthropic.com</code>. Cleared when you close this tab.</p>
             <button id="start-api" class="primary-btn">Start graded session →</button>
           </div>
         </div>
@@ -109,9 +116,6 @@
                 <span id="jd-file-name" class="jd-file-label"></span>
               </div>
               <textarea id="jd-text" rows="8" placeholder="…or paste the job description here (Markdown or plain text)"></textarea>
-            </label>
-            <label class="field-label needs-key">Anthropic API key
-              <input type="password" id="jd-api-key" placeholder="sk-ant-…" autocomplete="off" />
             </label>
             <label class="field-label">Model
               <select id="jd-model">

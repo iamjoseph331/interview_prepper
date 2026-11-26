@@ -307,7 +307,7 @@ async function startApi() {
 
 async function startJd() {
   const jdText = document.getElementById("jd-text").value.trim();
-  const apiKey = document.getElementById("jd-api-key").value.trim();
+  const apiKey = document.getElementById("api-key").value.trim();
   const model  = document.getElementById("jd-model").value;
   if (!jdText) { showError("Paste or upload a job description first."); return; }
   if (!apiKey && !state.grant) { showError("Paste an API key or connect Keyala first."); return; }
