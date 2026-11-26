@@ -247,25 +247,4 @@ window.addEventListener("load", () => {
       }
     };
   }
-
-  const origRenderDemo = window.renderPerQuestionDemo;
-  if (typeof origRenderDemo === "function") {
-    window.renderPerQuestionDemo = function(container) {
-      for (const r of window.state.results) {
-        const div = document.createElement("div");
-        div.className = "qresult";
-        const catName = window.categoryName ? window.categoryName(r.category_id) : r.category_id;
-        div.innerHTML = `
-          <div class="qresult-meta">
-            <span class="q-cat-chip">${escapeHtml(catName)}</span>
-          </div>
-          <div class="qresult-question">${escapeHtml(r.question)}</div>
-          <div class="qresult-answer-label">Your answer</div>
-          <div class="qresult-answer">${r.skipped||!r.answer ? "(skipped)" : escapeHtml(r.answer)}</div>
-          <div class="qresult-outline-label">Strong-answer outline</div>
-          <ul class="tight-list">${(r.strong_answer_outline||[]).map(s=>`<li>${escapeHtml(s)}</li>`).join("")}</ul>`;
-        container.appendChild(div);
-      }
-    };
-  }
 });

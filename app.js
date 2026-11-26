@@ -74,8 +74,7 @@ function setNote(categoryId, text) {
 // ---- State ----
 const state = {
   categories: [],
-  samples: {},
-  mode: null,        // 'api' | 'demo' | 'jd'
+  mode: null,        // 'api' | 'jd'
   level: "Junior",
   selectedIds: new Set(),
   numQuestions: 5,
@@ -92,12 +91,8 @@ window.state = state; // expose for ui.js
 
 // ---- Init ----
 async function init() {
-  const [cats, samples] = await Promise.all([
-    fetch("categories.json").then(r => r.json()),
-    fetch("samples.json").then(r => r.json()),
-  ]);
+  const cats = await fetch("categories.json").then(r => r.json());
   state.categories = cats.categories;
-  state.samples = samples;
   renderCategories();
   if (window.__renderCategoryChips) window.__renderCategoryChips();
   bindEvents();
@@ -127,7 +122,6 @@ function bindEvents() {
   document.getElementById("cat-all").onclick = () => setAllCats(true);
   document.getElementById("cat-none").onclick = () => setAllCats(false);
   document.getElementById("start-api").onclick = startApi;
-  document.getElementById("start-demo").onclick = startDemo;
   document.getElementById("start-jd-btn").onclick = startJd;
   document.getElementById("keyala-connect").onclick = connectKeyala;
   document.getElementById("keyala-disconnect").onclick = () => setGrant("");
@@ -311,26 +305,6 @@ async function startApi() {
   }
 }
 
-function startDemo() {
-  readSetup();
-  state.mode = "demo";
-  const pool = state.samples[state.level] || [];
-  let filtered = pool;
-  if (state.selectedIds.size > 0) {
-    filtered = pool.filter(q => state.selectedIds.has(q.category_id));
-  }
-  if (filtered.length === 0) {
-    showError("No demo questions match those categories at this level. Try 'Select all' or a different level.");
-    return;
-  }
-  showError("");
-  state.questions = shuffle(filtered).slice(0, Math.min(state.numQuestions, filtered.length));
-  state.idx = 0;
-  state.results = [];
-  renderQuestion();
-  showScreen("quiz");
-}
-
 async function startJd() {
   const jdText = document.getElementById("jd-text").value.trim();
   const apiKey = document.getElementById("jd-api-key").value.trim();
@@ -445,7 +419,6 @@ async function submitAnswer(skipped = false) {
     category_id: q.category_id,
     question: q.question,
     answer: answer,
-    strong_answer_outline: q.strong_answer_outline || null,
     evaluation: evaluation,
     skipped: !!skipped || !answer,
   });
@@ -690,22 +663,15 @@ async function finishSession() {
   const perQ = document.getElementById("per-question");
   perQ.innerHTML = "";
 
-  if (state.mode === "api" || state.mode === "jd") {
-    summary.innerHTML = `<p class="small">Computing final evaluation…</p>`;
-    let final = null;
-    try {
-      final = await finalEvaluation();
-    } catch (e) {
-      summary.innerHTML = `<p class="error">Final eval failed: ${e.message}</p>`;
-    }
-    if (final) renderSummary(final);
-    renderPerQuestionApi(perQ);
-  } else {
-    summary.innerHTML = `<h2>Demo complete — ${state.questions.length} question(s)</h2>
-      <p class="small">Demo mode shows a "strong-answer outline" for each question so you can self-compare.
-      Enter an API key in setup to get graded scoring and a session evaluation.</p>`;
-    renderPerQuestionDemo(perQ);
+  summary.innerHTML = `<p class="small">Computing final evaluation…</p>`;
+  let final = null;
+  try {
+    final = await finalEvaluation();
+  } catch (e) {
+    summary.innerHTML = `<p class="error">Final eval failed: ${e.message}</p>`;
   }
+  if (final) renderSummary(final);
+  renderPerQuestionApi(perQ);
 }
 
 function renderSummary(f) {
@@ -754,21 +720,6 @@ function renderPerQuestionApi(container) {
         <h4>Improvements</h4>
         <ul class="tight">${(e.improvements || []).map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>`;
     }
-    container.appendChild(div);
-  }
-}
-
-function renderPerQuestionDemo(container) {
-  for (const r of state.results) {
-    const div = document.createElement("div");
-    div.className = "qresult";
-    div.innerHTML = `
-      <div class="cat-chip">${escapeHtml(categoryName(r.category_id))}</div>
-      <h3>${escapeHtml(r.question)}</h3>
-      <h4>Your answer</h4>
-      <div class="q-answer">${r.skipped || !r.answer ? "(skipped)" : escapeHtml(r.answer)}</div>
-      <h4>Strong-answer outline</h4>
-      <ul class="tight">${(r.strong_answer_outline || []).map(s => `<li>${escapeHtml(s)}</li>`).join("")}</ul>`;
     container.appendChild(div);
   }
 }
@@ -825,14 +776,6 @@ function downloadAllNotes() {
 
 // ---- Helpers ----
 
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
 
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, ch => ({

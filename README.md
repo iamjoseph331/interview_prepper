@@ -1,6 +1,6 @@
 # Interview Prepper
 
-Visit https://iamjoseph331.github.io/interview_prepper/ for the demo
+Try it at https://iamjoseph331.github.io/interview_prepper/
 
 AI / ML / Data Science mock-interview practice, graded by Claude.
 
@@ -24,7 +24,6 @@ That's it — everything is static. A `.nojekyll` file is included so Pages serv
 
 ## Modes
 
-- **Demo mode** — no API key needed. Uses pre-baked questions from `samples.json` and shows a "strong-answer outline" after each attempt for self-comparison. No grading.
 - **Graded mode** — you paste your own Anthropic API key (`sk-ant-…`). The app generates fresh questions and scores each answer on 5 dimensions (Correctness, Depth, Clarity, Practical grounding, Level appropriateness) with a final session evaluation.
 
 - **Connect Keyala** — no key to paste. Press *Connect Keyala*, scan the QR with the [Keyala](https://keyala.io/) iPhone app, and approve each call on your phone. Your Claude key stays in Keyala; this page only holds a revocable grant token (in `localStorage`). Works with Graded and JD mode, using Claude Sonnet / Haiku / Opus 5.5. Local testing against a Keyala dev server: `?ky=http://localhost:8080&app=<your local app id>`.
@@ -47,6 +46,5 @@ Models supported: Sonnet 4.6 (default), Haiku 4.5 (cheap/fast), Opus 4.7 (highes
 |---|---|
 | `index.html`, `styles.css`, `app.js`, `ui.js` | Static SPA |
 | `categories.json` | 25 testable categories, grouped |
-| `samples.json` | Demo-mode questions + strong-answer outlines |
 | `PROMPTS.md` | Prompt contract: level defs, rubric, templates |
 | `CLAUDE.md` | Source outline of interview categories |
